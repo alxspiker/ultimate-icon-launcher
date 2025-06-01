@@ -4,24 +4,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const resizer = document.querySelector('.resizer');
     const iconRingContainer = document.querySelector('.icon-ring-container');
 
-    // Sample icon data (replace with your actual icons)
-    // Ensure you have these images in an 'icons/' folder relative to index.html
+    // Updated icon data from the repository
     const icons = [
-        { name: 'Sketch', src: 'app.png' },
-        { name: 'Wave', src: 'AppIcon 2-i.png' },
-        { name: 'Ghostty', src: 'AppIcon 3-i.png' },
-        { name: 'VSCode', src: 'AppIcon 3.png' },
-        { name: 'Inna', src: 'AppIcon 4-i.png' },
-        { name: 'Bartender', src: 'AppIcon 4.png' },
-        { name: 'TV', src: 'AppIcon 5-i.png' },
-        { name: 'Tables Plus', src: 'AppIcon 5.png' },
-        { name: 'OBS', src: 'AppIcon 6-i.png' },
-        { name: 'Wes Bos', src: 'AppIcon 6.png' },
-        { name: 'Popsicle', src: 'AppIcon 7.png' },
-        { name: 'Mail', src: 'AppIcon 8.png' },
-        { name: 'Firefox', src: 'firefox.png' },
+        { name: 'AppIcon 2-i', src: 'AppIcon 2-i.png' },
+        { name: 'AppIcon 3-i', src: 'AppIcon 3-i.png' },
+        { name: 'AppIcon 3', src: 'AppIcon 3.png' },
+        { name: 'AppIcon 4-i', src: 'AppIcon 4-i.png' },
+        { name: 'AppIcon 4', src: 'AppIcon 4.png' },
+        { name: 'AppIcon 5-i', src: 'AppIcon 5-i.png' },
+        { name: 'AppIcon 5', src: 'AppIcon 5.png' },
+        { name: 'AppIcon 6-i', src: 'AppIcon 6-i.png' },
+        { name: 'AppIcon 6', src: 'AppIcon 6.png' },
+        { name: 'AppIcon 7', src: 'AppIcon 7.png' },
+        { name: 'AppIcon 8', src: 'AppIcon 8.png' },
+        { name: 'AppIcon-Release-i', src: 'AppIcon-Release-i.png' },
+        { name: 'AppIcon-i', src: 'AppIcon-i.png' },
+        { name: 'Code', src: 'Code.png' },
+        { name: 'Cursor', src: 'Cursor.png' },
+        { name: 'Icon 2-i', src: 'Icon 2-i.png' },
+        { name: 'Trae-i', src: 'Trae-i.png' },
+        { name: 'Warp-i', src: 'Warp-i.png' },
+        { name: 'Windsurf', src: 'Windsurf.png' },
         { name: 'Xcode', src: 'Xcode.png' },
-        { name: 'Zed', src: 'Zed.png' }
+        { name: 'Zed', src: 'Zed.png' },
+        { name: 'app', src: 'app.png' },
+        { name: 'appIcon', src: 'appIcon.png' },
+        { name: 'cyberduck-application-rect', src: 'cyberduck-application-rect.png' },
+        { name: 'electron-i', src: 'electron-i.png' },
+        { name: 'electron', src: 'electron.png' },
+        { name: 'firefox', src: 'firefox.png' },
+        { name: 'icon-i', src: 'icon-i.png' },
+        { name: 'icon', src: 'icon.png' }
     ];
 
     let iconElements = [];
@@ -29,23 +42,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateLayout() {
         const ringRect = iconRing.getBoundingClientRect();
         const ringRadius = Math.min(ringRect.width, ringRect.height) / 2 * 0.85; // 85% of half the smallest dimension
-        const centerDotSize = Math.min(ringRect.width, ringRect.height) * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--center-dot-size-ratio') || '0.3');
+        // Ensure centerDotSizeRatio is correctly parsed, provide a default if CSS variable is missing
+        const centerDotSizeRatioString = getComputedStyle(document.documentElement).getPropertyValue('--center-dot-size-ratio').trim();
+        const centerDotSizeRatio = parseFloat(centerDotSizeRatioString) || 0.3;
+        const centerDotSize = Math.min(ringRect.width, ringRect.height) * centerDotSizeRatio;
         
-        document.documentElement.style.setProperty('--item-size', `${Math.min(60, ringRadius / 3)}px`);
-        document.documentElement.style.setProperty('--icon-image-size', `${Math.min(40, ringRadius / 4)}px`);
-
+        document.documentElement.style.setProperty('--item-size', `${Math.max(20, Math.min(60, ringRadius / 3))}px`);
+        document.documentElement.style.setProperty('--icon-image-size', `${Math.max(15, Math.min(40, ringRadius / 4))}px`);
 
         iconElements.forEach((item, index) => {
             const angle = (index / icons.length) * 2 * Math.PI - (Math.PI / 2); // Start from top
             const x = ringRadius * Math.cos(angle);
             const y = ringRadius * Math.sin(angle);
 
-            item.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-            // To make icons face outwards (optional)
-            // item.style.transform += ` rotate(${angle + Math.PI/2}rad)`;
+            // Base transform for positioning
+            let transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+            
+            // Optional: make icons face outwards
+            // transform += ` rotate(${angle + Math.PI/2}rad)`;
+            
+            item.style.transform = transform;
+            item.dataset.baseTransform = transform; // Store base transform for reset
         });
     }
-
 
     function createIcons() {
         iconRing.innerHTML = ''; // Clear existing icons
@@ -55,11 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.classList.add('icon-item');
             item.dataset.index = index;
-            item.title = iconData.name; // For default browser tooltip, can be styled too
+            item.title = iconData.name;
 
             const img = document.createElement('img');
-            img.src = `icons/${iconData.src}`; // Assuming icons are in an 'icons' folder
+            img.src = `icons/${iconData.src}`;
             img.alt = iconData.name;
+            img.onerror = () => { img.style.display = 'none'; item.style.backgroundColor = '#eee'; }; // Basic error handling
             item.appendChild(img);
 
             item.addEventListener('mouseenter', () => handleMouseEnter(item, iconData, index));
@@ -76,60 +96,56 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedAppLabel.textContent = iconData.name;
         selectedAppLabel.style.opacity = '1';
 
-        // Schooch effect
+        const schoochDistanceFactor = 0.2; // How much to move neighbors, relative to item size
+        const itemSize = parseFloat(getComputedStyle(item).width);
+        const schoochDistance = itemSize * schoochDistanceFactor;
+
+        // Function to apply schooch
+        const applySchooch = (targetItem, direction) => {
+            if (!targetItem) return;
+            const baseTransform = targetItem.dataset.baseTransform;
+            const currentAngle = (parseFloat(targetItem.dataset.index) / icons.length) * 2 * Math.PI - (Math.PI / 2);
+            
+            // Calculate schooch along the tangent of the circle for a more natural movement
+            // For previous item, schooch "backwards" along tangent; for next, "forwards"
+            const tangentAngle = currentAngle + (direction * Math.PI / 2); 
+            const schoochX = schoochDistance * Math.cos(tangentAngle) * direction; // direction determines push away or pull towards center based on tangent
+            const schoochY = schoochDistance * Math.sin(tangentAngle) * direction;
+
+            targetItem.style.transform = `${baseTransform} translate(${schoochX}px, ${schoochY}px)`;
+            targetItem.classList.add(direction > 0 ? 'schooched-prev' : 'schooched-next'); // Class names might seem reversed by logic
+        };
+        
         const prevIndex = (index - 1 + icons.length) % icons.length;
         const nextIndex = (index + 1) % icons.length;
 
-        const schoochStrength = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--item-size')) * 0.3; // 30% of item size
-
-        if (iconElements[prevIndex]) {
-            const prevAngle = (prevIndex / icons.length) * 2 * Math.PI - (Math.PI / 2);
-            const schoochX = -schoochStrength * Math.cos(prevAngle);
-            const schoochY = -schoochStrength * Math.sin(prevAngle);
-            const originalTransform = iconElements[prevIndex].style.transform.split('translate(-50%, -50%)')[0];
-            iconElements[prevIndex].style.transform = `${originalTransform} translate(${schoochX}px, ${schoochY}px) translate(-50%, -50%)`;
-            iconElements[prevIndex].classList.add('schooched-prev');
-        }
-        if (iconElements[nextIndex]) {
-            const nextAngle = (nextIndex / icons.length) * 2 * Math.PI - (Math.PI / 2);
-            const schoochX = schoochStrength * Math.cos(nextAngle);
-            const schoochY = schoochStrength * Math.sin(nextAngle);
-            const originalTransform = iconElements[nextIndex].style.transform.split('translate(-50%, -50%)')[0];
-            iconElements[nextIndex].style.transform = `${originalTransform} translate(${schoochX}px, ${schoochY}px) translate(-50%, -50%)`;
-            iconElements[nextIndex].classList.add('schooched-next');
-        }
+        applySchooch(iconElements[prevIndex], 1); // Schooch previous item
+        applySchooch(iconElements[nextIndex], -1); // Schooch next item
     }
 
     function handleMouseLeave(item, index) {
         item.classList.remove('hovered');
         selectedAppLabel.style.opacity = '0';
 
-        // Reset schooch effect
+        const resetSchooch = (targetItem) => {
+            if (targetItem && (targetItem.classList.contains('schooched-prev') || targetItem.classList.contains('schooched-next'))) {
+                targetItem.style.transform = targetItem.dataset.baseTransform;
+                targetItem.classList.remove('schooched-prev', 'schooched-next');
+            }
+        };
+
         const prevIndex = (index - 1 + icons.length) % icons.length;
         const nextIndex = (index + 1) % icons.length;
-
-        if (iconElements[prevIndex] && iconElements[prevIndex].classList.contains('schooched-prev')) {
-             const originalTransformBase = iconElements[prevIndex].style.transform.split(' translate(')[0];
-             iconElements[prevIndex].style.transform = `${originalTransformBase} translate(-50%, -50%)`;
-             iconElements[prevIndex].classList.remove('schooched-prev');
-        }
-       if (iconElements[nextIndex] && iconElements[nextIndex].classList.contains('schooched-next')) {
-            const originalTransformBase = iconElements[nextIndex].style.transform.split(' translate(')[0];
-            iconElements[nextIndex].style.transform = `${originalTransformBase} translate(-50%, -50%)`;
-            iconElements[nextIndex].classList.remove('schooched-next');
-        }
-        // After removing schooch, re-apply base positions to ensure correctness
-        updateLayout();
+        
+        resetSchooch(iconElements[prevIndex]);
+        resetSchooch(iconElements[nextIndex]);
     }
     
     // Initial setup
     createIcons();
 
-    // Handle resizing
-    // Using ResizeObserver for the .resizer element
     const resizeObserver = new ResizeObserver(entries => {
         for (let entry of entries) {
-            // Update the ring container size based on the resizer
             const resizerRect = entry.contentRect;
             iconRingContainer.style.width = `${resizerRect.width * 0.9}px`;
             iconRingContainer.style.height = `${resizerRect.height * 0.9}px`;
@@ -141,6 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeObserver.observe(resizer);
     }
     
-    // Fallback for window resize if resizer is not the primary mechanism
-    window.addEventListener('resize', updateLayout);
+    window.addEventListener('resize', () => {
+        // Fallback or additional trigger for layout update if not covered by ResizeObserver
+        // This ensures that if the window resizes causing the .resizer to change %-based dimensions, we catch it.
+        const resizerRect = resizer.getBoundingClientRect();
+         iconRingContainer.style.width = `${resizerRect.width * 0.9}px`;
+         iconRingContainer.style.height = `${resizerRect.height * 0.9}px`;
+        updateLayout();
+    });
 });

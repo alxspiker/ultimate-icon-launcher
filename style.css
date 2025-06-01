@@ -1,0 +1,172 @@
+:root {
+    --ring-size: 500px; /* Default size, will be adjusted by .resizer */
+    --item-size: 60px;
+    --icon-image-size: 40px;
+    --padding: 15px; /* Padding around icons */
+    --schooch-amount: 15deg; /* How much neighbors move */
+    --label-bg-color: #4e3f52;
+    --label-text-color: white;
+    --highlight-color: #2d82f5;
+    --ring-bg-color: #eae9e7;
+    --ring-border-color: #bab6ba;
+    --center-dot-size-ratio: 0.3; /* Ratio of ring-size */
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: radial-gradient(
+            circle at 1px 1px,
+            rgba(0, 0, 0, 0.05) 2px,
+            transparent 0
+        ),
+        linear-gradient(to right, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.03));
+    background-size: 20px 20px, 100% 100%;
+}
+
+.app-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.resizer {
+    width: var(--ring-size);
+    height: var(--ring-size);
+    min-width: 250px;
+    min-height: 250px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden; /* Important for resize handle */
+    resize: both; /* Allows user to resize */
+    border: 2px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* For container queries if we were to use them heavily */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    background-color: white;
+}
+
+.icon-ring-container {
+    position: relative;
+    width: 90%; /* Use a percentage of the resizer */
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-ring {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        transparent calc(var(--center-dot-size-ratio) * 50%),
+        var(--ring-bg-color) calc(var(--center-dot-size-ratio) * 50%)
+    );
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 0 5px var(--ring-border-color);
+    transform-style: preserve-3d; /* For potential 3D effects */
+}
+
+.ring-center {
+    position: absolute;
+    width: calc(100% * var(--center-dot-size-ratio));
+    height: calc(100% * var(--center-dot-size-ratio));
+    border-radius: 50%;
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2), inset 0 0 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Don't interfere with icon hovers */
+}
+
+#selected-app-label {
+    background: var(--label-bg-color);
+    color: var(--label-text-color);
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.icon-item {
+    position: absolute;
+    width: var(--item-size);
+    height: var(--item-size);
+    left: calc(50% - (var(--item-size) / 2));
+    top: calc(50% - (var(--item-size) / 2));
+    border-radius: 25%; /* Squircle shape */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    transform-origin: center center; /* Set dynamically by JS */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.icon-item:hover {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 10; /* Bring hovered item to front */
+}
+
+.icon-item img {
+    width: var(--icon-image-size);
+    height: var(--icon-image-size);
+    object-fit: contain;
+    pointer-events: none; /* So hover is on .icon-item */
+    transition: transform 0.3s ease;
+}
+
+.icon-item:hover img {
+    transform: scale(1.1);
+}
+
+/* Highlight "blue thing" - adapted from Project 3 */
+.icon-item::after {
+    content: "";
+    position: absolute;
+    width: 30px; /* Adjust as needed */
+    height: calc(var(--item-size) * 1.1);
+    top: -5%;
+    left: calc(50% - 15px); /* Center it */
+    z-index: -1; /* Behind the icon image */
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='104.7' viewBox='0 0 400 1047' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M199 0H75.5C75.5 0 44.6207 2.5 19.5 26C-5.62069 49.5 1.99999 78.5 1.99999 78.5L98.6147 1009.83C99.6609 1019.91 104.43 1029.24 111.991 1036C119.572 1042.77 129.33 1046.61 139.496 1046.8C139.496 1046.8 169 1044 194 1044C219 1044 261.418 1046.8 261.418 1046.8C271.583 1046.61 281.341 1042.77 288.923 1036C296.483 1029.24 301.252 1019.91 302.299 1009.83L398.913 78.5C398.913 78.5 406.534 49.5 381.413 26C356.293 2.5 325.413 0 325.413 0H199Z' fill='%232d82f5'/%3E%3C/svg%3E");
+    background-size: 130% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.icon-item.hovered::after {
+    opacity: 1;
+}
+
+/* For the "schooch" effect, applied via JS */
+.icon-item.schooched-next {
+    /* transform will be set by JS */
+}
+.icon-item.schooched-prev {
+    /* transform will be set by JS */
+}
